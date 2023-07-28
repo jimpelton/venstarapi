@@ -37,22 +37,36 @@ func NewVenstarClient(host string, port int) *VenstarClient {
 	return c
 }
 
-func (c *VenstarClient) get(url string) (body []byte, status int, err error) {
+func (c *VenstarClient) get(url string, rep VenstarReply) (err error) {
+	// TODO: maybe wrap error in non-generic error?
 	var resp *http.Response
-	resp, err = c.client.Get(url)
-	if err != nil {
-		return nil, 0, err
+
+	if resp, err = c.client.Get(url); err != nil {
+		return err
 	}
+
 	defer func() {
 		if resp != nil {
 			resp.Body.Close()
 		}
 	}()
+
+	var body []byte
 	if body, err = io.ReadAll(resp.Body); err != nil {
-		return nil, 0, err
+		return err
 	}
 
-	return body, resp.StatusCode, err
+	if resp.StatusCode != http.StatusOK {
+		// TODO: return non-generic error
+		return fmt.Errorf("http request returned status %s", resp.Status)
+	}
+
+	if err := json.Unmarshal(body, rep); err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 func (c *VenstarClient) makeUrl(ep string) string {
@@ -64,21 +78,11 @@ func (c *VenstarClient) makeUrl(ep string) string {
 // }
 
 func (c *VenstarClient) Info() (rep InfoReply, err error) {
-	body, status, err := c.get(c.makeUrl(queryinfo))
-	if err != nil {
-		return rep, err
-	}
-	if status != http.StatusOK {
-		// TODO: return non-generic error
-		return rep, fmt.Errorf("http request returned status %d", status)
-	}
-	if err := json.Unmarshal(body, &rep); err != nil {
-		return rep, err
-	}
-
-	return rep, nil
+	err = c.get(c.makeUrl(queryinfo), &rep)
+	return
 }
 
-func (c *VenstarClient) Sensors() SensorsReply {
-	return SensorsReply{}
+func (c *VenstarClient) Sensors() (rep SensorsReply, err error) {
+	err = c.get(c.makeUrl(querysensors), &rep)
+	return
 }

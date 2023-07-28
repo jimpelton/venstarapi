@@ -1,25 +1,19 @@
 package main
 
 import (
-	"net/http"
+	"fmt"
 	"runtime/debug"
 
 	"github.com/jimpelton/tstat/pkg/venstar"
 )
 
-func run() {
-	body, code, err := venstar.Get("http://192.168.0.23/query/info")
-	if err != nil {
-		println("Error: ", err.Error())
+func run(host string, port int) {
+	cli := venstar.NewVenstarClient(host, port)
+	if rep, err := cli.Info(); err != nil {
+		fmt.Printf("error getting info: %s", err.Error())
+	} else {
+		fmt.Println("Info: %+v", rep)
 	}
-
-	println("run(): reply status:", code)
-
-	if code != http.StatusOK {
-		return
-	}
-
-	println(string(body[:]))
 }
 
 func main() {
@@ -29,5 +23,5 @@ func main() {
 			// run()
 		}
 	}()
-	run()
+	run("192.168.0.22", 80)
 }
