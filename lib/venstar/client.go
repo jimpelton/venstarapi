@@ -1,6 +1,7 @@
 package venstar
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -68,8 +69,14 @@ func (c *VenstarClient) Info() (rep InfoReply, err error) {
 		return rep, err
 	}
 	if status != http.StatusOK {
-		return rep, fmt.Errorf("Http request returned status %d", status)
+		// TODO: return non-generic error
+		return rep, fmt.Errorf("http request returned status %d", status)
 	}
+	if err := json.Unmarshal(body, &rep); err != nil {
+		return rep, err
+	}
+
+	return rep, nil
 }
 
 func (c *VenstarClient) Sensors() SensorsReply {
