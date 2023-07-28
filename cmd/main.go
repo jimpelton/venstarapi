@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/jimpelton/tstat/lib/venstar"
+	"github.com/jimpelton/tstat/pkg/venstar"
 )
 
 func run() {
