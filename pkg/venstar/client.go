@@ -15,6 +15,7 @@ const (
 	queryinfo     = "query/info"
 	querysensors  = "query/sensors"
 	queryruntimes = "query/runtimes"
+	queryalerts   = "query/alerts"
 	control       = "control"
 	settings      = "settings"
 )
@@ -84,5 +85,15 @@ func (c *VenstarClient) Info() (rep InfoReply, err error) {
 
 func (c *VenstarClient) Sensors() (rep SensorsReply, err error) {
 	err = c.get(c.makeUrl(querysensors), &rep)
+	return
+}
+
+func (c *VenstarClient) Runtimes() (rep RuntimesReply, err error) {
+	err = c.get(c.makeUrl(queryruntimes), &rep)
+	return
+}
+
+func (c *VenstarClient) Alerts() (rep Alerts, err error) {
+	err = c.get(c.makeUrl(queryalerts), &rep)
 	return
 }
